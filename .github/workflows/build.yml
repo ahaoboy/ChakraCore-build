@@ -5,10 +5,6 @@ permissions:
 
 on:
   push:
-    tags:
-      - "v*"
-    branches:
-      - "main"
   pull_request:
 
 defaults:
@@ -59,7 +55,6 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         shell: "bash"
         run: |
-          xcode-select --install
           brew install cmake icu4c
 
       - name: install-${{ matrix.target }}
