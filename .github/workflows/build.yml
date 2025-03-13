@@ -107,6 +107,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: wait
+        run: |
+          sleep 120
       - uses: easy-install/easy-setup@v1
         with:
           url: https://github.com/ahaoboy/ChakraCore-build

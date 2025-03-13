@@ -15,6 +15,7 @@ cd ch
 mkdir ../dist
 
 cp ./out/Release/ch ../dist/ch
+cp -r ./out/Release/libChakraCore* ../dist
 
 cd ..
 
