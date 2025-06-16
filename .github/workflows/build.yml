@@ -19,15 +19,18 @@ jobs:
         include:
           - target: x86_64-apple-darwin
             os: macos-13
-          - target: aarch64-apple-darwin
-            os: macos-14
-          # - target: x86_64-pc-windows-gnu
-          #   os: windows-latest
+          # TODO: https://github.com/chakra-core/ChakraCore/issues/6860
+          # - target: aarch64-apple-darwin
+          #   os: macos-14
+          - target: x86_64-pc-windows-gnu
+            os: windows-latest
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-24.04
+
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.target }}
     steps:
+
       - uses: actions/checkout@v4
       # - uses: msys2/setup-msys2@v2
       #   if: matrix.os == 'windows-latest'
@@ -49,22 +52,39 @@ jobs:
       - name: install-${{ matrix.target }}
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          sudo apt-get install -y git build-essential cmake clang libicu-dev
+          sudo apt-get install -y git build-essential clang libicu-dev libidn-dev
+          ls -lh /usr/lib/x86_64-linux-gnu/libidn*
+          sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
 
       - name: install-${{ matrix.target }}
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install cmake icu4c
 
-      - name: install-${{ matrix.target }}
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo apt-get install -y git build-essential cmake clang libicu-dev
+      # - name: install-${{ matrix.target }}
+      #   if: startsWith(matrix.os, 'ubuntu')
+      #   run: |
+      #     sudo apt-get install -y git build-essential cmake clang libicu-dev
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.2.x'
 
       - name: build-${{ matrix.target }}
         if: matrix.os != 'windows-latest'
         run: |
+          cmake --version
           bash build.sh ${{ matrix.target }}
+
+      - name: build-${{ matrix.target }}
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl -L -o chakracore.zip https://globalcdn.nuget.org/packages/microsoft.chakracore.vc140.1.11.24.nupkg?packageVersion=1.11.24
+          unzip chakracore.zip -d ch
+
+          cp -r ./ch/lib/native/v140/x64/release ./dist
+          tar -czf ./ch-${{ matrix.target }}.tar.gz -C dist .
 
       # - name: build-windows
       #   if: matrix.os == 'windows-latest'
@@ -101,7 +121,7 @@ jobs:
         os: [
             ubuntu-24.04,
             # windows-latest,
-            macos-14,
+            # macos-14,
             macos-13,
           ]
     runs-on: ${{ matrix.os }}
