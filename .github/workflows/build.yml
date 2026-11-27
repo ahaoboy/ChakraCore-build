@@ -136,13 +136,6 @@ jobs:
       - name: wait
         run: |
           sleep 120
-      - name: install-${{ matrix.target }}
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo apt-get install -y git build-essential clang libicu-dev libidn-dev
-          ls -lh /usr/lib/x86_64-linux-gnu/libidn*
-          sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
-
       - uses: easy-install/easy-setup@v1
         with:
           url: https://github.com/ahaoboy/ChakraCore-build
