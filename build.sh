@@ -17,28 +17,23 @@ mkdir ../dist
 cp ./out/Release/ch ../dist/ch
 cp -r ./out/Release/libChakraCore* ../dist
 
-for pattern in 'libicuuc*' 'libicui18n*'; do
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        # macOS
-        paths=$(find /usr/lib /usr/local/lib /opt/homebrew/lib \
-            -name "$pattern" -type f 2>/dev/null || true)
-    else
-        # Linux
-        paths=$(ldconfig -p 2>/dev/null |
-            awk -v pattern="$pattern" 'index($1, pattern) == 1 { print $NF }')
-    fi
+BIN="../dist/ch"
+DIST="../dist"
 
-    if [[ -z "$paths" ]]; then
-        echo "Missing: $pattern"
-        exit 1
-    fi
+if [[ "$(uname -s)" == Darwin ]]; then
+    paths=$(otool -L "$BIN" | awk 'NR > 1 {print $1}')
+else
+    paths=$(ldd "$BIN" | awk '/=> \// {print $3} /^[[:space:]]*\// {print $1}')
+fi
 
-    while IFS= read -r path; do
-        [[ -f "$path" ]] || continue
-        cp -L "$path" ../dist/
-        echo "Copied: $path -> ../dist/"
-    done <<< "$paths"
-done
+while IFS= read -r path; do
+    case "$(basename "$path")" in
+        libxml2*|libicuuc*|libicui18n*)
+            cp -L "$path" "$DIST/"
+            echo "Copied: $path"
+            ;;
+    esac
+done <<< "$paths"
 
 cd ..
 
