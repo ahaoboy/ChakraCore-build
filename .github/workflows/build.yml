@@ -53,8 +53,8 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get install -y git build-essential clang libicu-dev libidn-dev
-          ls -lh /usr/lib/x86_64-linux-gnu/libidn*
-          sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
+          # ls -lh /usr/lib/x86_64-linux-gnu/libidn*
+          # sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
 
       - name: install-${{ matrix.target }}
         if: startsWith(matrix.os, 'macos')
@@ -126,7 +126,7 @@ jobs:
       matrix:
         os: [
             ubuntu-latest,
-            # windows-latest,
+            windows-latest,
             # macos-14,
             # macos-13,
           ]
@@ -142,5 +142,5 @@ jobs:
       - name: test
         run: |
           which ch
-          echo "console.log(1+1)" >> ./test.js
-          ch ./test.js
+          curl -L -o run.js https://github.com/ahaoboy/js-engine-benchmark/releases/download/nightly/run.js
+          ch ./run.js
